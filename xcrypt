@@ -68,17 +68,24 @@ if [[ "$operation" == "e" ]]; then
 		fileOutput="$fileOutput.ENC"
 	fi
 
-	tarCmd=(tar -rvf "$fileOutput.tar")
+	tarCmd=( tar -rvf "$fileOutput.tar")
 	for inputPathItem in "${filePathsAry[@]}"
 	do
 		tarCmd+=("$inputPathItem")
 	done
 		
 	"${tarCmd[@]}"
-	7z a -t7z -m0=lzma2 -mx=9 -mfb=32 -md=32m -ms=on -mhe=on -p$password $fileOutput $fileOutput.tar
+
+	sevenZipCompressCmd=( 7z a -t7z -m0=lzma2 -mx=9 -mfb=32 -md=32m -ms=on -mhe=on -p$password $fileOutput $fileOutput.tar)
+	${sevenZipCompressCmd[@]}
+
 	rm "$fileOutput.tar"
 else # operation == "d"
-	sevenZipExtractCmd=(7z x $fileInput -p$password)
+	sevenZipExtractCmd=( 7z x $fileInput)
+
+	if [[ $password != '' ]]; then
+		sevenZipExtractCmd+=(-p$password)
+	fi
 
 	filePathAryLen=${#filePathsAry[@]}
 	extractOutputPath=''
@@ -93,7 +100,7 @@ else # operation == "d"
 
 	"${sevenZipExtractCmd[@]}"
 
-	tarCmd=(tar xf)
+	tarCmd=( tar xf)
 	tarFilePath=''
 	if [[ $extractOutputPath != '' ]]; then
 		if [[ $extractOutputPath == */ ]]; then
