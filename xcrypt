@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# operation types: e = encrypt, d = decrypt
+local operation=''
+local password=''
+local fileOutput=''
+local fileInput=''
+local filePathsAry=()
+
+if [[ $# -eq 0 ]]
+then	
+	echo "XCrypt (7-Zip Based AES-256 Encryption/Decryption)"
+	echo "Jonathan Tiefer - Copyright (c) 2021-2022"
+	echo ""
+	echo "This program uses the 7-Zip program, including 7z.exe and 7z.dll to perform "
+	echo "compression and encryption.  7-zip is licensed under the GNU LGPL license." 
+	echo ""
+	echo "The source code for 7-Zip can be found at www.7-zip.org"
+	echo "" ; echo ""
+	echo "XCrypt Command Line Reference"
+	echo ""
+	echo "Usage:"
+	echo "Encrypt: xcrypt e/encrypt [OutputFileName] -p <password> [file/dir name(s)...]"
+	echo "Decrypt: xcrypt d/decrypt [InputFileName] -p <password> [output path:optional]"
+	echo ""
+	echo "Command Line Arguments:"
+	echo "e/encrypt [OutputFileName]: Encrypt files or directories to specified file"
+	echo "d/decrypt [InputFileName]: Decrypt specified .ENC file"
+	echo "-p/--password: Password used for encryption"
+
+	return;
+fi
+
+while [[ $# -gt 0 ]]; do
+	argKey=$(echo "$1" | tr '[:upper:]' '[:lower:]')	
+	argVal=''
+
+	case $argKey in
+		e|encrypt)
+			operation="e"			
+			fileOutput="$2"
+			shift # past argument
+			shift # past value
+			;;
+		d|decrypt)
+			operation="d"
+			fileInput="$2"
+			shift # past argument
+			shift # past value
+			;;
+		-p|--password)
+			password="$2"
+			shift # past argument
+			shift # past value
+			;;
+		*)
+			#File Name command line arguments will be the only parameter that contains random data.
+			filePathsAry+=("$argKey")
+
+			shift # past argument		
+			;;	
+	esac
+done
+
+if [[ "$operation" == "e" ]]; then
+	fileOutputLower=$(echo "$fileOutput" | tr '[:upper:]' '[:lower:]')
+	if [[ $fileOutputLower != *.enc ]]; then		
+		fileOutput="$fileOutput.ENC"
+	fi
+
+	tarCmd=(tar -rvf "$fileOutput.tar")
+	for inputPathItem in "${filePathsAry[@]}"
+	do
+		tarCmd+=("$inputPathItem")
+	done
+		
+	"${tarCmd[@]}"
+	7z a -t7z -m0=lzma2 -mx=9 -mfb=32 -md=32m -ms=on -mhe=on -p$password $fileOutput $fileOutput.tar
+	rm "$fileOutput.tar"
+else # operation == "d"
+	sevenZipExtractCmd=(7z x $fileInput -p$password)
+
+	filePathAryLen=${#filePathsAry[@]}
+	extractOutputPath=''
+
+	if [[ $filePathAryLen == 1 ]]; then
+		extractOutputPath="${filePathsAry[1]}"	
+		sevenZipExtractCmd+=(-o$extractOutputPath)
+	elif [[ $filePathAryLen -gt 1 ]]; then
+		echo "Invalid arguments specified.  Decryption only requires one output path argument."
+		return;
+	fi
+
+	"${sevenZipExtractCmd[@]}"
+
+	tarCmd=(tar xf)
+	tarFilePath=''
+	if [[ $extractOutputPath != '' ]]; then
+		if [[ $extractOutputPath == */ ]]; then
+			tarFilePath="$extractOutputPath$fileInput.tar"
+		else	
+			tarFilePath="$extractOutputPath/$fileInput.tar"
+		fi
+	else
+		tarFilePath="$fileInput.tar"
+	fi
+
+	tarCmd+=("$tarFilePath")
+
+	if [[ $extractOutputPath != '' ]]; then
+		tarCmd+=(-C "$extractOutputPath")
+	else
+		tarCmd+=(-C .)
+	fi
+
+	"${tarCmd[@]}"
+	rm "$tarFilePath"
+fi
