@@ -1,4 +1,4 @@
-# TieCrypt (7-Zip Based AES-256 Encryption/Decryption)
+## TieCrypt (7-Zip Based AES-256 Encryption/Decryption)
 ### <i>Jonathan Tiefer - Copyright (c) 2021-2022</i>
 
 ### This program uses the 7-Zip program, including 7z.exe and 7z.dll to perform compression and encryption.  7-zip is licensed under the GNU LGPL license
