@@ -9,7 +9,7 @@ local filePathsAry=()
 
 if [[ $# -eq 0 ]]
 then	
-	echo "XCrypt (7-Zip Based AES-256 Encryption/Decryption)"
+	echo "TieCrypt (7-Zip Based AES-256 Encryption/Decryption)"
 	echo "Jonathan Tiefer - Copyright (c) 2021-2022"
 	echo ""
 	echo "This program uses the 7-Zip program, including 7z.exe and 7z.dll to perform "
@@ -17,11 +17,11 @@ then
 	echo ""
 	echo "The source code for 7-Zip can be found at www.7-zip.org"
 	echo "" ; echo ""
-	echo "XCrypt Command Line Reference"
+	echo "TieCrypt Command Line Reference"
 	echo ""
 	echo "Usage:"
-	echo "Encrypt: xcrypt e/encrypt [OutputFileName] -p <password> [file/dir name(s)...]"
-	echo "Decrypt: xcrypt d/decrypt [InputFileName] -p <password> [output path:optional]"
+	echo "Encrypt: tcrypt e/encrypt [OutputFileName] -p <password> [file/dir name(s)...]"
+	echo "Decrypt: tcrypt d/decrypt [InputFileName] -p <password> [output path:optional]"
 	echo ""
 	echo "Command Line Arguments:"
 	echo "e/encrypt [OutputFileName]: Encrypt files or directories to specified file"
